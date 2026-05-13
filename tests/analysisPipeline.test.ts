@@ -6,8 +6,8 @@ import { generateDrafts } from '../src/agents/draftWriters';
 import { reviewDrafts } from '../src/agents/reviewAgent';
 
 describe('analysis pipeline agents', () => {
-  it('extracts requirements with source references', () => {
-    const requirements = extractRequirements([
+  it('extracts requirements with source references', async () => {
+    const requirements = await extractRequirements([
       {
         id: 'doc-1',
         kind: 'requirement',
@@ -24,7 +24,7 @@ describe('analysis pipeline agents', () => {
     });
   });
 
-  it('matches requirements to product knowledge and marks gaps', () => {
+  it('matches requirements to product knowledge and marks gaps', async () => {
     const requirements = [
       {
         id: 'req-1',
@@ -43,7 +43,7 @@ describe('analysis pipeline agents', () => {
         sourceExcerpt: '系统需要支持离线巡检'
       }
     ];
-    const chunks = indexProductKnowledge([
+    const chunks = await indexProductKnowledge([
       {
         id: 'doc-2',
         kind: 'product',
@@ -52,13 +52,13 @@ describe('analysis pipeline agents', () => {
       }
     ]);
 
-    const matches = matchProducts(requirements, chunks);
+    const matches = await matchProducts(requirements, chunks);
 
     expect(matches.find((item) => item.requirementId === 'req-1')?.status).toBe('matched');
     expect(matches.find((item) => item.requirementId === 'req-2')?.status).toBe('gap');
   });
 
-  it('generates grounded drafts and review findings', () => {
+  it('generates grounded drafts and review findings', async () => {
     const requirements = [
       {
         id: 'req-1',
@@ -80,8 +80,8 @@ describe('analysis pipeline agents', () => {
       }
     ];
 
-    const drafts = generateDrafts(requirements, matches);
-    const findings = reviewDrafts(drafts, requirements, matches);
+    const drafts = await generateDrafts(requirements, matches);
+    const findings = await reviewDrafts(drafts, requirements, matches);
 
     expect(drafts.solution.content).toContain('统一登录');
     expect(drafts.bid.content).toContain('需求响应');

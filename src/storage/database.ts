@@ -12,9 +12,45 @@ import type {
   WorkflowResult
 } from '../shared/types';
 
+export interface StoredVectorChunk {
+  id: string;
+  documentId: string;
+  content: string;
+  embedding: number[];
+  createdAt: string;
+}
+
+export interface EvaluationRecord {
+  id: string;
+  projectId: string;
+  runId: string;
+  category: string;
+  mode: string;
+  inputSnapshot: unknown;
+  outputSnapshot: unknown;
+  score: number | null;
+  notes: string;
+  createdAt: string;
+}
+
+export interface UserRecord {
+  id: string;
+  username: string;
+  passwordHash: string;
+  displayName: string;
+  createdAt: string;
+}
+
+export interface ProjectMember {
+  projectId: string;
+  userId: string;
+  role: 'owner' | 'editor' | 'viewer';
+  addedAt: string;
+}
+
 export interface AppDatabase {
-  createProject(name: string): ProjectRecord;
-  listProjects(): ProjectRecord[];
+  createProject(name: string, ownerId?: string): ProjectRecord;
+  listProjects(userId?: string): ProjectRecord[];
   getProject(id: string): ProjectRecord | null;
   updateProjectStatus(id: string, status: ProjectRecord['status']): void;
   saveDocument(document: Omit<StoredDocument, 'id' | 'createdAt'>): StoredDocument;
@@ -25,6 +61,23 @@ export interface AppDatabase {
   getDrafts(projectId: string): DraftArtifact[];
   updateDraft(projectId: string, draftId: string, content: string): DraftArtifact | null;
   getReviewFindings(projectId: string): ReviewFinding[];
+  saveVectorChunk(chunk: StoredVectorChunk): void;
+  getVectorChunks(): StoredVectorChunk[];
+  clearVectorChunks(): void;
+  saveEvaluation(evaluation: EvaluationRecord): void;
+  getEvaluations(projectId: string): EvaluationRecord[];
+  updateEvaluationScore(id: string, score: number | null, notes: string): EvaluationRecord | null;
+  createUser(username: string, passwordHash: string, displayName: string): UserRecord;
+  getUserByUsername(username: string): UserRecord | null;
+  getUserById(id: string): UserRecord | null;
+  addProjectMember(projectId: string, userId: string, role: ProjectMember['role']): ProjectMember;
+  getProjectMembers(projectId: string): ProjectMember[];
+  getProjectRole(projectId: string, userId: string): ProjectMember['role'] | null;
+  removeProjectMember(projectId: string, userId: string): void;
+  saveChatMessage(projectId: string, role: string, content: string): void;
+  getChatMessages(projectId: string, limit?: number): Array<{ role: string; content: string; createdAt: string }>;
+  clearChatMessages(projectId: string): void;
+  getPreviousRunContext(projectId: string): { requirements: number; matches: Record<string, number>; findings: number; lastRunAt: string | null } | null;
 }
 
 export function createDatabase(dataDir = process.env.DATA_DIR ?? '.data'): AppDatabase {
@@ -35,7 +88,7 @@ export function createDatabase(dataDir = process.env.DATA_DIR ?? '.data'): AppDa
   ensureSchema(db);
 
   return {
-    createProject(name) {
+    createProject(name, ownerId) {
       const now = new Date().toISOString();
       const project: ProjectRecord = {
         id: randomUUID(),
@@ -45,12 +98,23 @@ export function createDatabase(dataDir = process.env.DATA_DIR ?? '.data'): AppDa
         updatedAt: now
       };
       db.prepare(
-        'INSERT INTO projects (id, name, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
-      ).run(project.id, project.name, project.status, project.createdAt, project.updatedAt);
+        'INSERT INTO projects (id, name, status, owner_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
+      ).run(project.id, project.name, project.status, ownerId ?? null, project.createdAt, project.updatedAt);
+      if (ownerId) {
+        db.prepare(
+          'INSERT INTO project_members (project_id, user_id, role, added_at) VALUES (?, ?, ?, ?)'
+        ).run(project.id, ownerId, 'owner', now);
+      }
       return project;
     },
 
-    listProjects() {
+    listProjects(userId) {
+      if (userId) {
+        const rows = db.prepare(
+          'SELECT p.* FROM projects p INNER JOIN project_members m ON p.id = m.project_id WHERE m.user_id = ? ORDER BY p.updated_at DESC'
+        ).all(userId);
+        return rows.map(toProject);
+      }
       return db.prepare('SELECT * FROM projects ORDER BY updated_at DESC').all().map(toProject);
     },
 
@@ -198,7 +262,170 @@ export function createDatabase(dataDir = process.env.DATA_DIR ?? '.data'): AppDa
 
     getReviewFindings(projectId) {
       return db.prepare('SELECT * FROM review_findings WHERE project_id = ? ORDER BY rowid ASC').all(projectId).map(toFinding);
-    }
+    },
+
+    saveVectorChunk(chunk) {
+      db.prepare(
+        'INSERT INTO vector_chunks (id, document_id, content, embedding, created_at) VALUES (?, ?, ?, ?, ?)'
+      ).run(chunk.id, chunk.documentId, chunk.content, JSON.stringify(chunk.embedding), chunk.createdAt);
+    },
+
+    getVectorChunks() {
+      const rows = db.prepare('SELECT * FROM vector_chunks ORDER BY rowid ASC').all();
+      return rows.map((row: unknown) => {
+        const r = row as Record<string, string>;
+        return {
+          id: r.id,
+          documentId: r.document_id,
+          content: r.content,
+          embedding: JSON.parse(r.embedding) as number[],
+          createdAt: r.created_at,
+        };
+      });
+    },
+
+    clearVectorChunks() {
+      db.exec('DELETE FROM vector_chunks');
+    },
+
+    saveEvaluation(evaluation) {
+      db.prepare(
+        'INSERT INTO evaluations (id, project_id, run_id, category, mode, input_snapshot, output_snapshot, score, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      ).run(
+        evaluation.id,
+        evaluation.projectId,
+        evaluation.runId,
+        evaluation.category,
+        evaluation.mode,
+        JSON.stringify(evaluation.inputSnapshot),
+        JSON.stringify(evaluation.outputSnapshot),
+        evaluation.score,
+        evaluation.notes,
+        evaluation.createdAt,
+      );
+    },
+
+    getEvaluations(projectId) {
+      const rows = db.prepare('SELECT * FROM evaluations WHERE project_id = ? ORDER BY created_at DESC').all(projectId);
+      return rows.map((row: unknown) => {
+        const r = row as Record<string, string>;
+        return {
+          id: r.id,
+          projectId: r.project_id,
+          runId: r.run_id,
+          category: r.category,
+          mode: r.mode,
+          inputSnapshot: JSON.parse(r.input_snapshot),
+          outputSnapshot: JSON.parse(r.output_snapshot),
+          score: r.score !== null ? Number(r.score) : null,
+          notes: r.notes,
+          createdAt: r.created_at,
+        };
+      });
+    },
+
+    updateEvaluationScore(id, score, notes) {
+      db.prepare('UPDATE evaluations SET score = ?, notes = ? WHERE id = ?').run(score, notes, id);
+      const row = db.prepare('SELECT * FROM evaluations WHERE id = ?').get(id);
+      if (!row) return null;
+      const r = row as Record<string, string>;
+      return {
+        id: r.id,
+        projectId: r.project_id,
+        runId: r.run_id,
+        category: r.category,
+        mode: r.mode,
+        inputSnapshot: JSON.parse(r.input_snapshot),
+        outputSnapshot: JSON.parse(r.output_snapshot),
+        score: r.score !== null ? Number(r.score) : null,
+        notes: r.notes,
+        createdAt: r.created_at,
+      };
+    },
+
+    createUser(username, passwordHash, displayName) {
+      const now = new Date().toISOString();
+      const user: UserRecord = { id: randomUUID(), username, passwordHash, displayName, createdAt: now };
+      db.prepare(
+        'INSERT INTO users (id, username, password_hash, display_name, created_at) VALUES (?, ?, ?, ?, ?)'
+      ).run(user.id, user.username, user.passwordHash, user.displayName, user.createdAt);
+      return user;
+    },
+
+    getUserByUsername(username) {
+      const row = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+      return row ? toUser(row) : null;
+    },
+
+    getUserById(id) {
+      const row = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+      return row ? toUser(row) : null;
+    },
+
+    addProjectMember(projectId, userId, role) {
+      const now = new Date().toISOString();
+      db.prepare(
+        'INSERT OR REPLACE INTO project_members (project_id, user_id, role, added_at) VALUES (?, ?, ?, ?)'
+      ).run(projectId, userId, role, now);
+      return { projectId, userId, role, addedAt: now };
+    },
+
+    getProjectMembers(projectId) {
+      const rows = db.prepare('SELECT * FROM project_members WHERE project_id = ?').all(projectId);
+      return rows.map(toMember);
+    },
+
+    getProjectRole(projectId, userId) {
+      const row = db.prepare('SELECT role FROM project_members WHERE project_id = ? AND user_id = ?').get(projectId, userId);
+      return row ? (row as Record<string, string>).role as ProjectMember['role'] : null;
+    },
+
+    removeProjectMember(projectId, userId) {
+      db.prepare('DELETE FROM project_members WHERE project_id = ? AND user_id = ?').run(projectId, userId);
+    },
+
+    saveChatMessage(projectId, role, content) {
+      db.prepare(
+        'INSERT INTO conversations (project_id, role, content, created_at) VALUES (?, ?, ?, ?)'
+      ).run(projectId, role, content, new Date().toISOString());
+    },
+
+    getChatMessages(projectId, limit = 50) {
+      const rows = db.prepare(
+        'SELECT role, content, created_at FROM conversations WHERE project_id = ? ORDER BY id ASC LIMIT ?'
+      ).all(projectId, limit);
+      return rows.map((row: unknown) => {
+        const r = row as Record<string, string>;
+        return { role: r.role, content: r.content, createdAt: r.created_at };
+      });
+    },
+
+    clearChatMessages(projectId) {
+      db.prepare('DELETE FROM conversations WHERE project_id = ?').run(projectId);
+    },
+
+    getPreviousRunContext(projectId) {
+      const runRow = db.prepare(
+        'SELECT result_json, created_at FROM workflow_runs WHERE project_id = ? ORDER BY created_at DESC LIMIT 1'
+      ).get(projectId);
+      if (!runRow) return null;
+      const r = runRow as Record<string, string>;
+      try {
+        const result = JSON.parse(r.result_json);
+        const matchSummary: Record<string, number> = {};
+        for (const m of result.matches ?? []) {
+          matchSummary[m.status] = (matchSummary[m.status] ?? 0) + 1;
+        }
+        return {
+          requirements: (result.requirements ?? []).length,
+          matches: matchSummary,
+          findings: (result.reviewFindings ?? []).length,
+          lastRunAt: r.created_at,
+        };
+      } catch {
+        return null;
+      }
+    },
   };
 }
 
@@ -208,8 +435,23 @@ function ensureSchema(db: DatabaseSync) {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       status TEXT NOT NULL,
+      owner_id TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      display_name TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS project_members (
+      project_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      role TEXT NOT NULL,
+      added_at TEXT NOT NULL,
+      PRIMARY KEY (project_id, user_id)
     );
     CREATE TABLE IF NOT EXISTS documents (
       id TEXT PRIMARY KEY,
@@ -261,6 +503,32 @@ function ensureSchema(db: DatabaseSync) {
       id TEXT PRIMARY KEY,
       project_id TEXT NOT NULL,
       result_json TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS vector_chunks (
+      id TEXT PRIMARY KEY,
+      document_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      embedding TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS conversations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id TEXT NOT NULL,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS evaluations (
+      id TEXT PRIMARY KEY,
+      project_id TEXT NOT NULL,
+      run_id TEXT NOT NULL,
+      category TEXT NOT NULL,
+      mode TEXT NOT NULL,
+      input_snapshot TEXT NOT NULL,
+      output_snapshot TEXT NOT NULL,
+      score REAL,
+      notes TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
   `);
@@ -337,4 +605,14 @@ function toFinding(row: unknown): ReviewFinding {
     detail: record.detail,
     target: record.target || undefined
   };
+}
+
+function toUser(row: unknown): UserRecord {
+  const r = row as Record<string, string>;
+  return { id: r.id, username: r.username, passwordHash: r.password_hash, displayName: r.display_name, createdAt: r.created_at };
+}
+
+function toMember(row: unknown): ProjectMember {
+  const r = row as Record<string, string>;
+  return { projectId: r.project_id, userId: r.user_id, role: r.role as ProjectMember['role'], addedAt: r.added_at };
 }

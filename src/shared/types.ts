@@ -83,6 +83,24 @@ export interface WorkflowResult {
   completedAt: string;
 }
 
+export interface AgentContext {
+  projectId: string;
+  previousRun: {
+    requirements: number;
+    matches: Record<string, number>;
+    findings: number;
+    lastRunAt: string | null;
+  } | null;
+  stepOutputs: Record<string, unknown>;
+  metrics: {
+    requirementsCount: number;
+    matchedCount: number;
+    partialCount: number;
+    gapCount: number;
+    coveragePercent: number;
+  };
+}
+
 export interface ProjectRecord {
   id: string;
   name: string;
