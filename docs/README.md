@@ -21,6 +21,20 @@
 - 导出：`docx`
 - 测试：Vitest
 
+## 架构视图
+
+### 应用架构视图
+
+面向业务汇报，突出项目任务制、AI 投标中台和交付沉淀闭环。
+
+![高层汇报版架构图](./executive-architecture.png)
+
+### 业务/研发架构视图
+
+面向研发评审，展示前端、API、Workflow/Agent、服务层、存储和外部模型能力之间的关系。
+
+![研发评审版架构图](./engineering-architecture.png)
+
 ## 核心流程
 
 1. 创建投标/方案项目。

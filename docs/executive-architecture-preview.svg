@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1136" height="1004" viewBox="0 0 1136 1004">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#374151" />
+    </marker>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff" />
+  <text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="32" fill="#1e40af" text-anchor="start" opacity="1"><tspan x="42" y="72">高层架构图 · 汇报视角</tspan></text>
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="16" fill="#64748b" text-anchor="start" opacity="1"><tspan x="42" y="106">面向管理汇报，聚焦项目任务制、AI 辅助投标闭环、知识沉淀与多人协同，不展开实现细节。</tspan></text>
+<ellipse cx="125" cy="181" rx="85" ry="33" fill="#fed7aa" stroke="#c2410c" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="16" fill="#374151" text-anchor="middle" opacity="1"><tspan x="126" y="187">商机与资料输入</tspan></text>
+<rect x="392" y="144" width="250" height="74" rx="10" ry="10" fill="#ddd6fe" stroke="#6d28d9" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="22" fill="#374151" text-anchor="middle" opacity="1"><tspan x="518" y="190">AI 投标中台</tspan></text>
+<ellipse cx="955" cy="181" rx="93" ry="33" fill="#a7f3d0" stroke="#047857" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="16" fill="#374151" text-anchor="middle" opacity="1"><tspan x="954" y="187">交付与知识沉淀</tspan></text>
+<polyline points="214,182 384,182" fill="none" stroke="#c2410c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<polyline points="648,182 852,182" fill="none" stroke="#6d28d9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="24" fill="#1e40af" text-anchor="start" opacity="1"><tspan x="46" y="304">输入与协同</tspan></text>
+<rect x="58" y="338" width="260" height="118" rx="10" ry="10" fill="#dbeafe" stroke="#1e3a5f" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="20" fill="#374151" text-anchor="middle" opacity="1"><tspan x="189" y="388">需求说明书</tspan><tspan x="189" y="413">招标文件 / 澄清纪要</tspan><tspan x="189" y="438">产品说明书 / 历史方案</tspan><tspan x="189" y="463">项目成员与角色</tspan></text>
+<rect x="58" y="494" width="260" height="142" rx="10" ry="10" fill="#60a5fa" stroke="#1e3a5f" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="20" fill="#ffffff" text-anchor="middle" opacity="1"><tspan x="187" y="546">销售 / 售前发起项目</tspan><tspan x="187" y="571">产品 / 交付补能力证据</tspan><tspan x="187" y="596">投标经理 / 法务控风险</tspan><tspan x="187" y="621">客户 / 招标方提出约束</tspan></text>
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="24" fill="#1e40af" text-anchor="start" opacity="1"><tspan x="432" y="304">智能处理核心</tspan></text>
+<rect x="468" y="350" width="360" height="190" rx="10" ry="10" fill="#ddd6fe" stroke="#6d28d9" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="22" fill="#374151" text-anchor="middle" opacity="1"><tspan x="647" y="410">项目任务制 AI 中台</tspan><tspan x="647" y="437.5">文档解析与需求拆解</tspan><tspan x="647" y="465">产品能力匹配与缺口判断</tspan><tspan x="647" y="492.5">方案 / 标书起草</tspan><tspan x="647" y="520">AI 审校与 Chat 答疑</tspan><tspan x="647" y="547.5">多人协同编辑与状态跟踪</tspan></text>
+<ellipse cx="572" cy="616" rx="66" ry="38" fill="#ddd6fe" stroke="#6d28d9" stroke-width="2" opacity="1" />
+<ellipse cx="682" cy="610" rx="78" ry="44" fill="#ddd6fe" stroke="#6d28d9" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="20" fill="#374151" text-anchor="middle" opacity="1"><tspan x="636" y="615">Workflow + Agent</tspan><tspan x="636" y="640">规则回退 + LLM</tspan></text>
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="24" fill="#1e40af" text-anchor="start" opacity="1"><tspan x="872" y="304">交付与治理结果</tspan></text>
+<ellipse cx="998" cy="380" rx="98" ry="34" fill="#93c5fd" stroke="#1e3a5f" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="18" fill="#374151" text-anchor="middle" opacity="1"><tspan x="998" y="388">需求清单与匹配结论</tspan></text>
+<ellipse cx="998" cy="484" rx="98" ry="34" fill="#a7f3d0" stroke="#047857" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="18" fill="#374151" text-anchor="middle" opacity="1"><tspan x="1000" y="492">方案草稿与投标材料</tspan></text>
+<ellipse cx="998" cy="590" rx="98" ry="34" fill="#fef3c7" stroke="#b45309" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="18" fill="#374151" text-anchor="middle" opacity="1"><tspan x="998" y="598">审核意见与风险控制</tspan></text>
+<ellipse cx="998" cy="696" rx="98" ry="34" fill="#60a5fa" stroke="#1e3a5f" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="18" fill="#ffffff" text-anchor="middle" opacity="1"><tspan x="996" y="704">对话记忆与项目复用</tspan></text>
+<polyline points="322,396 458,408" fill="none" stroke="#1e3a5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<polyline points="322,560 458,532" fill="none" stroke="#1e3a5f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<polyline points="830,446 890,394" fill="none" stroke="#6d28d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<polyline points="834,482 888,482" fill="none" stroke="#6d28d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<polyline points="830,514 888,590" fill="none" stroke="#6d28d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<polyline points="786,638 886,690" fill="none" stroke="#6d28d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="1" marker-end="url(#arrowhead)" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="20" fill="#3b82f6" text-anchor="start" opacity="1"><tspan x="44" y="788">汇报要点</tspan></text>
+<rect x="58" y="812" width="300" height="152" rx="10" ry="10" fill="#1e293b" stroke="#1e3a5f" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="18" fill="#22c55e" text-anchor="start" opacity="1"><tspan x="82" y="858">1. 项目任务制统一人、资料、</tspan><tspan x="82" y="880.5">   过程和结果。</tspan><tspan x="82" y="903">2. AI 负责分析、匹配、</tspan><tspan x="82" y="925.5">   起草和审校。</tspan><tspan x="82" y="948">3. 人工继续保留承诺确认与</tspan><tspan x="82" y="970.5">   最终提交控制权。</tspan></text>
+<rect x="392" y="812" width="310" height="152" rx="10" ry="10" fill="#1e293b" stroke="#1e3a5f" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="18" fill="#22c55e" text-anchor="start" opacity="1"><tspan x="416" y="858">4. 输出不仅是标书草稿，</tspan><tspan x="416" y="880.5">   还包括需求清单、匹配结论、</tspan><tspan x="416" y="903">   风险提示。</tspan><tspan x="416" y="925.5">5. 对话历史、评估记录和</tspan><tspan x="416" y="948">   运行结果会沉淀为可复用知识资产。</tspan></text>
+<rect x="736" y="812" width="360" height="152" rx="10" ry="10" fill="#1e293b" stroke="#1e3a5f" stroke-width="2" opacity="1" />
+<text font-family="Virgil, Segoe UI, PingFang SC, sans-serif" font-size="18" fill="#22c55e" text-anchor="start" opacity="1"><tspan x="760" y="858">6. 架构支持从单次文档生成，</tspan><tspan x="760" y="880.5">   演进到跨项目知识运营。</tspan><tspan x="760" y="903">7. 系统价值体现在缩短投标</tspan><tspan x="760" y="925.5">   准备周期、提升承诺可控性、</tspan><tspan x="760" y="948">   形成可积累资产。</tspan></text>
+</svg>
